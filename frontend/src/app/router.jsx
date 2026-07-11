@@ -32,10 +32,12 @@ import { TripDispatcherPage } from '../modules/trips/pages/TripDispatcherPage';
 import { AnalyticsPage } from '../modules/analytics/pages/AnalyticsPage';
 import { SettingsPage } from '../modules/settings/pages/SettingsPage';
 
-// Placeholder Pages for future phases
-const MaintenancePlaceholder = () => <div className="p-6">Maintenance Module</div>;
-const FinancePlaceholder = () => <div className="p-6">Finance Module</div>;
+import { MaintenancePage } from '../modules/maintenance/pages/MaintenancePage';
+import { CreateMaintenancePage } from '../modules/maintenance/pages/CreateMaintenancePage';
+import { MaintenanceDetailsPage } from '../modules/maintenance/pages/MaintenanceDetailsPage';
 
+// Placeholder Pages for future phases
+const FinancePlaceholder = () => <div className="p-6">Finance Module</div>;
 export const router = createBrowserRouter([
   {
     path: ROUTES.LOGIN,
@@ -80,7 +82,9 @@ export const router = createBrowserRouter([
       { path: `${ROUTES.TRIPS}/:id`, element: <TripDetailsPage /> },
       { path: `${ROUTES.TRIPS}/:id/dispatch`, element: <TripDispatcherPage /> },
 
-      { path: ROUTES.MAINTENANCE, element: <MaintenancePlaceholder /> },
+      { path: ROUTES.MAINTENANCE, element: <MaintenancePage /> },
+      { path: `${ROUTES.MAINTENANCE}/new`, element: <CreateMaintenancePage /> },
+      { path: `${ROUTES.MAINTENANCE}/:id`, element: <MaintenanceDetailsPage /> },
       { path: ROUTES.FINANCE, element: <FinancePlaceholder /> },
       { path: ROUTES.ANALYTICS, element: <AnalyticsPage /> },
       { path: ROUTES.SETTINGS, element: <SettingsPage /> },
