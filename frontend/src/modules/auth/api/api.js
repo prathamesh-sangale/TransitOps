@@ -27,11 +27,11 @@ export const authApi = {
         throw new Error('Email and password are required');
       }
       
-      if (credentials.email === 'error@transitops.local') {
-        throw new Error('Invalid credentials');
+      if (credentials.email === 'admin@transitops.com' && credentials.password === 'password123') {
+        return MOCK_AUTH_RESPONSE;
       }
 
-      return MOCK_AUTH_RESPONSE;
+      throw new Error('Invalid email or password');
     } else {
       // Real API call
       const response = await axios.post('/api/auth/login', credentials);

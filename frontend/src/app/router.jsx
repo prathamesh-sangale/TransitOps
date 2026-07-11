@@ -10,9 +10,19 @@ import { DashboardPage } from '../modules/dashboard/pages/DashboardPage';
 import { UnauthorizedPage } from '../modules/error/pages/UnauthorizedPage';
 import { NotFoundPage } from '../modules/error/pages/NotFoundPage';
 
+// Vehicle Pages
+import { VehiclesPage } from '../modules/vehicles/pages/VehiclesPage';
+import { VehicleDetailsPage } from '../modules/vehicles/pages/VehicleDetailsPage';
+import { CreateVehiclePage } from '../modules/vehicles/pages/CreateVehiclePage';
+import { EditVehiclePage } from '../modules/vehicles/pages/EditVehiclePage';
+
+// Driver Pages
+import { DriversPage } from '../modules/drivers/pages/DriversPage';
+import { DriverDetailsPage } from '../modules/drivers/pages/DriverDetailsPage';
+import { CreateDriverPage } from '../modules/drivers/pages/CreateDriverPage';
+import { EditDriverPage } from '../modules/drivers/pages/EditDriverPage';
+
 // Placeholder Pages for future phases
-const VehiclesPlaceholder = () => <div className="p-6">Vehicles Module</div>;
-const DriversPlaceholder = () => <div className="p-6">Drivers Module</div>;
 const TripsPlaceholder = () => <div className="p-6">Trips Module</div>;
 const MaintenancePlaceholder = () => <div className="p-6">Maintenance Module</div>;
 const FinancePlaceholder = () => <div className="p-6">Finance Module</div>;
@@ -44,8 +54,19 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to={ROUTES.DASHBOARD} replace /> },
       { path: ROUTES.DASHBOARD, element: <DashboardPage /> },
-      { path: ROUTES.VEHICLES, element: <VehiclesPlaceholder /> },
-      { path: ROUTES.DRIVERS, element: <DriversPlaceholder /> },
+      
+      // Vehicles
+      { path: ROUTES.VEHICLES, element: <VehiclesPage /> },
+      { path: `${ROUTES.VEHICLES}/new`, element: <CreateVehiclePage /> },
+      { path: `${ROUTES.VEHICLES}/:id`, element: <VehicleDetailsPage /> },
+      { path: `${ROUTES.VEHICLES}/:id/edit`, element: <EditVehiclePage /> },
+      
+      // Drivers
+      { path: ROUTES.DRIVERS, element: <DriversPage /> },
+      { path: `${ROUTES.DRIVERS}/new`, element: <CreateDriverPage /> },
+      { path: `${ROUTES.DRIVERS}/:id`, element: <DriverDetailsPage /> },
+      { path: `${ROUTES.DRIVERS}/:id/edit`, element: <EditDriverPage /> },
+
       { path: ROUTES.TRIPS, element: <TripsPlaceholder /> },
       { path: ROUTES.MAINTENANCE, element: <MaintenancePlaceholder /> },
       { path: ROUTES.FINANCE, element: <FinancePlaceholder /> },
