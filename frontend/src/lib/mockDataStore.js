@@ -37,5 +37,17 @@ export const mockDataStore = {
       driverId: null,
       dispatchedAt: null,
     }
+  ],
+  maintenance: [
+    {
+      id: 'M-5001',
+      vehicleId: 'V-103',
+      serviceType: 'Engine Repair',
+      description: 'Replacing timing belt and checking transmission.',
+      estimatedCost: '1500',
+      status: 'ACTIVE',
+      createdAt: '2024-07-09T08:30:00Z',
+      completedAt: null
+    }
   ]
 };
