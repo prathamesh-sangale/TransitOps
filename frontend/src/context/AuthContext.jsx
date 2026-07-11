@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from 'react';
-import { ROLES } from '../constants/roles';
+import { authApi } from '../modules/auth/api/api';
 
 export const AuthContext = createContext(null);
 
@@ -8,30 +8,55 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Mock user load from local storage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const storedUser = localStorage.getItem('transitops_user');
+    const storedToken = localStorage.getItem('transitops_token');
+    if (storedUser && storedToken) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error('Failed to parse user from local storage');
+        localStorage.removeItem('transitops_user');
+        localStorage.removeItem('transitops_token');
+      }
     }
     setIsLoading(false);
   }, []);
 
-  const login = async (email, password) => {
-    // Mock login logic, this will be replaced with real API call
-    const mockUser = { id: 1, email, role: ROLES.FLEET_MANAGER, name: 'Admin User' };
-    setUser(mockUser);
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    localStorage.setItem('token', 'mock-jwt-token');
+  const login = async (credentials) => {
+    setIsLoading(true);
+    try {
+      const response = await authApi.login(credentials);
+      if (response.success) {
+        const { user, token } = response.data;
+        setUser(user);
+        localStorage.setItem('transitops_user', JSON.stringify(user));
+        localStorage.setItem('transitops_token', token);
+        return { success: true };
+      }
+      return { success: false, error: 'Login failed' };
+    } catch (error) {
+      return { success: false, error: error.message || 'Login failed' };
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+  const logout = async () => {
+    setIsLoading(true);
+    try {
+      await authApi.logout();
+    } catch (e) {
+      console.error('Logout API failed, still removing local session', e);
+    } finally {
+      setUser(null);
+      localStorage.removeItem('transitops_user');
+      localStorage.removeItem('transitops_token');
+      setIsLoading(false);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

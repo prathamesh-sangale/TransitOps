@@ -1,7 +1,7 @@
 import { Outlet, NavLink } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { ROUTES } from '../constants/routes';
-import { LayoutDashboard, Truck, Users, Route, Wrench, DollarSign, BarChart2, Settings, LogOut, Menu } from 'lucide-react';
+import { LayoutDashboard, Truck, Users, Route, Wrench, WalletCards, ChartNoAxesCombined, Settings, LogOut, Menu } from 'lucide-react';
 import { useState } from 'react';
 
 const NAV_ITEMS = [
@@ -10,8 +10,8 @@ const NAV_ITEMS = [
   { path: ROUTES.DRIVERS, label: 'Drivers', icon: Users },
   { path: ROUTES.TRIPS, label: 'Trips', icon: Route },
   { path: ROUTES.MAINTENANCE, label: 'Maintenance', icon: Wrench },
-  { path: ROUTES.FINANCE, label: 'Finance', icon: DollarSign },
-  { path: ROUTES.ANALYTICS, label: 'Analytics', icon: BarChart2 },
+  { path: ROUTES.FINANCE, label: 'Finance', icon: WalletCards },
+  { path: ROUTES.ANALYTICS, label: 'Analytics', icon: ChartNoAxesCombined },
   { path: ROUTES.SETTINGS, label: 'Settings', icon: Settings },
 ];
 
@@ -24,7 +24,7 @@ export const AppLayout = () => {
       {/* Sidebar Mobile Overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-text-primary/50 z-20 md:hidden"
+          className="fixed inset-0 bg-text-primary/50 z-20 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -32,7 +32,7 @@ export const AppLayout = () => {
       {/* Sidebar */}
       <aside className={`
         fixed inset-y-0 left-0 z-30 w-64 bg-surface border-r border-border-subtle transform transition-transform duration-200 ease-in-out
-        md:relative md:translate-x-0
+        lg:relative lg:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="h-16 flex items-center px-6 border-b border-border-subtle">
@@ -65,7 +65,7 @@ export const AppLayout = () => {
         {/* Header */}
         <header className="h-16 bg-surface border-b border-border-subtle flex items-center justify-between px-4 sm:px-6">
           <button 
-            className="md:hidden p-2 text-text-secondary hover:bg-surface-secondary rounded-md"
+            className="lg:hidden p-2 text-text-secondary hover:bg-surface-secondary rounded-md"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu className="w-5 h-5" />

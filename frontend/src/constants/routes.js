@@ -8,4 +8,6 @@ export const ROUTES = {
   FINANCE: '/finance',
   ANALYTICS: '/analytics',
   SETTINGS: '/settings',
+  UNAUTHORIZED: '/unauthorized',
+  SESSION_EXPIRED: '/session-expired',
 };
