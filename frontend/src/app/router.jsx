@@ -22,8 +22,13 @@ import { DriverDetailsPage } from '../modules/drivers/pages/DriverDetailsPage';
 import { CreateDriverPage } from '../modules/drivers/pages/CreateDriverPage';
 import { EditDriverPage } from '../modules/drivers/pages/EditDriverPage';
 
+// Trip Pages
+import { TripsPage } from '../modules/trips/pages/TripsPage';
+import { CreateTripPage } from '../modules/trips/pages/CreateTripPage';
+import { TripDetailsPage } from '../modules/trips/pages/TripDetailsPage';
+import { TripDispatcherPage } from '../modules/trips/pages/TripDispatcherPage';
+
 // Placeholder Pages for future phases
-const TripsPlaceholder = () => <div className="p-6">Trips Module</div>;
 const MaintenancePlaceholder = () => <div className="p-6">Maintenance Module</div>;
 const FinancePlaceholder = () => <div className="p-6">Finance Module</div>;
 const AnalyticsPlaceholder = () => <div className="p-6">Analytics Module</div>;
@@ -67,7 +72,12 @@ export const router = createBrowserRouter([
       { path: `${ROUTES.DRIVERS}/:id`, element: <DriverDetailsPage /> },
       { path: `${ROUTES.DRIVERS}/:id/edit`, element: <EditDriverPage /> },
 
-      { path: ROUTES.TRIPS, element: <TripsPlaceholder /> },
+      // Trips
+      { path: ROUTES.TRIPS, element: <TripsPage /> },
+      { path: `${ROUTES.TRIPS}/new`, element: <CreateTripPage /> },
+      { path: `${ROUTES.TRIPS}/:id`, element: <TripDetailsPage /> },
+      { path: `${ROUTES.TRIPS}/:id/dispatch`, element: <TripDispatcherPage /> },
+
       { path: ROUTES.MAINTENANCE, element: <MaintenancePlaceholder /> },
       { path: ROUTES.FINANCE, element: <FinancePlaceholder /> },
       { path: ROUTES.ANALYTICS, element: <AnalyticsPlaceholder /> },
