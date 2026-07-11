@@ -28,11 +28,13 @@ import { CreateTripPage } from '../modules/trips/pages/CreateTripPage';
 import { TripDetailsPage } from '../modules/trips/pages/TripDetailsPage';
 import { TripDispatcherPage } from '../modules/trips/pages/TripDispatcherPage';
 
+// Analytics & Settings
+import { AnalyticsPage } from '../modules/analytics/pages/AnalyticsPage';
+import { SettingsPage } from '../modules/settings/pages/SettingsPage';
+
 // Placeholder Pages for future phases
 const MaintenancePlaceholder = () => <div className="p-6">Maintenance Module</div>;
 const FinancePlaceholder = () => <div className="p-6">Finance Module</div>;
-const AnalyticsPlaceholder = () => <div className="p-6">Analytics Module</div>;
-const SettingsPlaceholder = () => <div className="p-6">Settings Module</div>;
 
 export const router = createBrowserRouter([
   {
@@ -80,8 +82,8 @@ export const router = createBrowserRouter([
 
       { path: ROUTES.MAINTENANCE, element: <MaintenancePlaceholder /> },
       { path: ROUTES.FINANCE, element: <FinancePlaceholder /> },
-      { path: ROUTES.ANALYTICS, element: <AnalyticsPlaceholder /> },
-      { path: ROUTES.SETTINGS, element: <SettingsPlaceholder /> },
+      { path: ROUTES.ANALYTICS, element: <AnalyticsPage /> },
+      { path: ROUTES.SETTINGS, element: <SettingsPage /> },
     ],
   },
   { 
