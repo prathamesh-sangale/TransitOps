@@ -2,35 +2,26 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import { env } from './config/env.js';
+import { notFoundHandler } from './middleware/notFound.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import routes from './routes/index.js';
 
 const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: env.FRONTEND_ORIGIN }));
 app.use(helmet());
 app.use(morgan('dev'));
 
-// Health Endpoint
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    data: {
-      status: 'ok'
-    }
-  });
-});
+// Central API Routes
+app.use('/api', routes);
 
-// Central Error Middleware Placeholder
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    error: {
-      code: 'INTERNAL_SERVER_ERROR',
-      message: 'Something went wrong on the server.'
-    }
-  });
-});
+// 404 Handler
+app.use(notFoundHandler);
+
+// Central Error Handler
+app.use(errorHandler);
 
 export default app;
