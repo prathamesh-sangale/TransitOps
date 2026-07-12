@@ -4,14 +4,17 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { validate } from '../middleware/validate.js';
 import { uuidParamSchema, paginationQuerySchema } from '../validators/common.validator.js';
 import { createVehicleSchema, updateVehicleSchema } from '../validators/mutation.validator.js';
+import { ROLES } from '../constants/roles.js';
+import { authenticate } from '../middleware/authenticate.js';
+import { authorize } from '../middleware/authorize.js';
 
 const router = Router();
 
-router.get('/', validate(paginationQuerySchema), asyncHandler(vehicleController.getVehicles));
-router.get('/:id', validate(uuidParamSchema), asyncHandler(vehicleController.getVehicle));
+router.get('/', authenticate, authorize(ROLES.FLEET_MANAGER, ROLES.DISPATCHER, ROLES.SAFETY_OFFICER), validate(paginationQuerySchema), asyncHandler(vehicleController.getVehicles));
+router.get('/:id', authenticate, authorize(ROLES.FLEET_MANAGER, ROLES.DISPATCHER, ROLES.SAFETY_OFFICER), validate(uuidParamSchema), asyncHandler(vehicleController.getVehicle));
 
-router.post('/', validate(createVehicleSchema), asyncHandler(vehicleController.createVehicle));
-router.patch('/:id', validate(uuidParamSchema), validate(updateVehicleSchema), asyncHandler(vehicleController.updateVehicle));
-router.post('/:id/retire', validate(uuidParamSchema), asyncHandler(vehicleController.retireVehicle));
+router.post('/', authenticate, authorize(ROLES.FLEET_MANAGER), validate(createVehicleSchema), asyncHandler(vehicleController.createVehicle));
+router.patch('/:id', authenticate, authorize(ROLES.FLEET_MANAGER), validate(uuidParamSchema), validate(updateVehicleSchema), asyncHandler(vehicleController.updateVehicle));
+router.post('/:id/retire', authenticate, authorize(ROLES.FLEET_MANAGER), validate(uuidParamSchema), asyncHandler(vehicleController.retireVehicle));
 
 export default router;

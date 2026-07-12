@@ -3,6 +3,7 @@ import { comparePassword } from '../utils/password.js';
 import { signAccessToken } from '../utils/jwt.js';
 
 import { ROLES } from '../constants/roles.js';
+import { ApiError } from '../utils/ApiError.js';
 
 const CANONICAL_ROLES = Object.values(ROLES);
 
@@ -15,35 +16,23 @@ export const login = async (email, password) => {
 
   // 3. Reject if user does not exist (using uniform credential error)
   if (!user) {
-    throw {
-      code: 'INVALID_CREDENTIALS',
-      message: 'Invalid email or password'
-    };
+    throw new ApiError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
   }
 
   // 4. Verify password
   const isValidPassword = await comparePassword(password, user.password_hash);
   if (!isValidPassword) {
-    throw {
-      code: 'INVALID_CREDENTIALS',
-      message: 'Invalid email or password'
-    };
+    throw new ApiError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
   }
 
   // 5. Verify user is active
   if (!user.is_active) {
-    throw {
-      code: 'ACCOUNT_INACTIVE',
-      message: 'This account has been deactivated.'
-    };
+    throw new ApiError(403, 'ACCOUNT_INACTIVE', 'This account has been deactivated.');
   }
 
   // 6. Validate canonical role
   if (!CANONICAL_ROLES.includes(user.role)) {
-    throw {
-      code: 'INVALID_USER_IDENTITY',
-      message: 'User identity configuration is invalid.'
-    };
+    throw new ApiError(403, 'INVALID_USER_IDENTITY', 'User identity configuration is invalid.');
   }
 
   // 7. Generate JWT payload

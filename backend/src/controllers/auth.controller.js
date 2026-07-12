@@ -13,16 +13,6 @@ export const login = async (req, res, next) => {
       data: result
     });
   } catch (error) {
-    if (error.code) {
-      // Return canonical API error format for known auth errors
-      return res.status(error.code === 'INVALID_CREDENTIALS' ? 401 : 403).json({
-        success: false,
-        error: {
-          code: error.code,
-          message: error.message
-        }
-      });
-    }
     next(error);
   }
 };

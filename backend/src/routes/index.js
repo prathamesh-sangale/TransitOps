@@ -9,8 +9,12 @@ import fuelRoutes from './fuel.routes.js';
 import expenseRoutes from './expense.routes.js';
 import dashboardRoutes from './dashboard.routes.js';
 import analyticsRoutes from './analytics.routes.js';
+import authRoutes from './auth.routes.js';
 
 const router = Router();
+
+// Auth routes
+router.use('/auth', authRoutes);
 
 // Health endpoint
 router.get('/health', (req, res) => {
