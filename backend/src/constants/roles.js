@@ -1,3 +1,6 @@
+/**
+ * Canonical user roles for TransitOps RBAC.
+ */
 export const ROLES = {
   FLEET_MANAGER: 'FLEET_MANAGER',
   DISPATCHER: 'DISPATCHER',
