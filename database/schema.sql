@@ -82,7 +82,7 @@ CREATE TABLE vehicles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     registration_number VARCHAR(100) NOT NULL UNIQUE CHECK (char_length(registration_number) > 0),
     vehicle_type VARCHAR(100) NOT NULL,
-    max_load_capacity NUMERIC NOT NULL CHECK (max_load_capacity > 0),
+    max_load_capacity NUMERIC(10,2) NOT NULL CHECK (max_load_capacity > 0),
     odometer NUMERIC NOT NULL CHECK (odometer >= 0),
     health_score NUMERIC NOT NULL DEFAULT 100 CHECK (health_score >= 0 AND health_score <= 100),
     status vehicle_status NOT NULL DEFAULT 'AVAILABLE',
@@ -109,8 +109,8 @@ CREATE TABLE trips (
     origin VARCHAR(255) NOT NULL,
     destination VARCHAR(255) NOT NULL,
     cargo_description TEXT,
-    cargo_weight NUMERIC NOT NULL CHECK (cargo_weight > 0),
-    planned_distance NUMERIC NOT NULL CHECK (planned_distance > 0),
+    cargo_weight NUMERIC(10,2) NOT NULL CHECK (cargo_weight > 0),
+    planned_distance NUMERIC(10,2) NOT NULL CHECK (planned_distance > 0),
     vehicle_id UUID REFERENCES vehicles(id) ON DELETE RESTRICT,
     driver_id UUID REFERENCES drivers(id) ON DELETE RESTRICT,
     risk_score NUMERIC CHECK (risk_score >= 0 AND risk_score <= 100),
@@ -120,7 +120,10 @@ CREATE TABLE trips (
     cancelled_at TIMESTAMPTZ,
     cancellation_reason TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT chk_trip_dispatched CHECK (status != 'DISPATCHED' OR (vehicle_id IS NOT NULL AND driver_id IS NOT NULL AND dispatched_at IS NOT NULL)),
+    CONSTRAINT chk_trip_completed CHECK (status != 'COMPLETED' OR completed_at IS NOT NULL),
+    CONSTRAINT chk_trip_cancelled CHECK (status != 'CANCELLED' OR cancelled_at IS NOT NULL)
 );
 
 -- Maintenance Records Table
@@ -131,18 +134,19 @@ CREATE TABLE maintenance_records (
     description TEXT,
     start_date DATE NOT NULL,
     completed_at TIMESTAMPTZ,
-    cost NUMERIC NOT NULL DEFAULT 0 CHECK (cost >= 0),
+    cost NUMERIC(12,2) NOT NULL DEFAULT 0 CHECK (cost >= 0),
     status maintenance_status NOT NULL DEFAULT 'ACTIVE',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT chk_maintenance_completed CHECK (status != 'COMPLETED' OR completed_at IS NOT NULL)
 );
 
 -- Fuel Logs Table
 CREATE TABLE fuel_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     vehicle_id UUID NOT NULL REFERENCES vehicles(id) ON DELETE RESTRICT,
-    fuel_quantity NUMERIC NOT NULL CHECK (fuel_quantity > 0),
-    fuel_cost NUMERIC NOT NULL CHECK (fuel_cost >= 0),
+    fuel_quantity NUMERIC(10,2) NOT NULL CHECK (fuel_quantity > 0),
+    fuel_cost NUMERIC(12,2) NOT NULL CHECK (fuel_cost >= 0),
     odometer_reading NUMERIC NOT NULL CHECK (odometer_reading >= 0),
     logged_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -154,7 +158,7 @@ CREATE TABLE expenses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     category VARCHAR(100) NOT NULL,
     description TEXT,
-    amount NUMERIC NOT NULL CHECK (amount >= 0),
+    amount NUMERIC(12,2) NOT NULL CHECK (amount >= 0),
     expense_date DATE NOT NULL,
     vehicle_id UUID REFERENCES vehicles(id) ON DELETE RESTRICT,
     trip_id UUID REFERENCES trips(id) ON DELETE RESTRICT,
