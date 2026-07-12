@@ -10,11 +10,11 @@ INSERT INTO users (id, name, email, password_hash, role, is_active) VALUES
     ('00000000-0000-0000-0000-000000000004', 'Financial Analyst', 'finance@transitops.local', '$2a$12$KixbQo.t5.X88Vj4gG7j4OF4tJ5n3n3X3n3n3X3n3n3X3n3n3X3n3', 'FINANCIAL_ANALYST', true);
 
 -- 2. Vehicles
-INSERT INTO vehicles (id, registration_number, vehicle_type, max_load_capacity, odometer, status) VALUES
-    ('10000000-0000-0000-0000-000000000001', 'TRK-001', 'Heavy Truck', 20000.0, 150000, 'AVAILABLE'),
-    ('10000000-0000-0000-0000-000000000002', 'TRK-002', 'Van', 5000.0, 12000, 'ON_TRIP'),
-    ('10000000-0000-0000-0000-000000000003', 'TRK-003', 'Flatbed', 15000.0, 240000, 'IN_SHOP'),
-    ('10000000-0000-0000-0000-000000000004', 'TRK-004', 'Heavy Truck', 22000.0, 350000, 'RETIRED');
+INSERT INTO vehicles (id, registration_number, vehicle_type, max_load_capacity, odometer, health_score, status) VALUES
+    ('10000000-0000-0000-0000-000000000001', 'TRK-001', 'Heavy Truck', 20000.0, 150000, 95, 'AVAILABLE'),
+    ('10000000-0000-0000-0000-000000000002', 'TRK-002', 'Van', 5000.0, 12000, 85, 'ON_TRIP'),
+    ('10000000-0000-0000-0000-000000000003', 'TRK-003', 'Flatbed', 15000.0, 240000, 45, 'IN_SHOP'),
+    ('10000000-0000-0000-0000-000000000004', 'TRK-004', 'Heavy Truck', 22000.0, 350000, 10, 'RETIRED');
 
 -- 3. Drivers
 INSERT INTO drivers (id, name, license_number, license_expiry, safety_score, status) VALUES
@@ -26,16 +26,16 @@ INSERT INTO drivers (id, name, license_number, license_expiry, safety_score, sta
 
 -- 4. Trips
 -- DRAFT trip
-INSERT INTO trips (id, trip_number, origin, destination, cargo_description, cargo_weight, planned_distance, status) VALUES
-    ('30000000-0000-0000-0000-000000000001', 'TRP-1001', 'Warehouse A', 'Store B', 'Electronics', 1500.0, 45.0, 'DRAFT');
+INSERT INTO trips (id, trip_number, origin, destination, cargo_description, cargo_weight, planned_distance, risk_score, status) VALUES
+    ('30000000-0000-0000-0000-000000000001', 'TRP-1001', 'Warehouse A', 'Store B', 'Electronics', 1500.0, 45.0, 20, 'DRAFT');
 
 -- DISPATCHED trip (linked to ON_TRIP vehicle and driver)
-INSERT INTO trips (id, trip_number, origin, destination, cargo_description, cargo_weight, planned_distance, vehicle_id, driver_id, status, dispatched_at) VALUES
-    ('30000000-0000-0000-0000-000000000002', 'TRP-1002', 'Distribution Center', 'Retail C', 'Clothing', 2000.0, 120.0, '10000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000002', 'DISPATCHED', NOW());
+INSERT INTO trips (id, trip_number, origin, destination, cargo_description, cargo_weight, planned_distance, vehicle_id, driver_id, risk_score, status, dispatched_at) VALUES
+    ('30000000-0000-0000-0000-000000000002', 'TRP-1002', 'Distribution Center', 'Retail C', 'Clothing', 2000.0, 120.0, '10000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000002', 35, 'DISPATCHED', NOW());
 
 -- COMPLETED trip
-INSERT INTO trips (id, trip_number, origin, destination, cargo_description, cargo_weight, planned_distance, vehicle_id, driver_id, status, dispatched_at, completed_at) VALUES
-    ('30000000-0000-0000-0000-000000000003', 'TRP-1003', 'Port', 'Warehouse A', 'Machinery', 10000.0, 300.0, '10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', 'COMPLETED', NOW() - INTERVAL '2 days', NOW() - INTERVAL '1 day');
+INSERT INTO trips (id, trip_number, origin, destination, cargo_description, cargo_weight, planned_distance, vehicle_id, driver_id, risk_score, status, dispatched_at, completed_at) VALUES
+    ('30000000-0000-0000-0000-000000000003', 'TRP-1003', 'Port', 'Warehouse A', 'Machinery', 10000.0, 300.0, '10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', 15, 'COMPLETED', NOW() - INTERVAL '2 days', NOW() - INTERVAL '1 day');
 
 -- 5. Maintenance Records
 -- ACTIVE maintenance (linked to IN_SHOP vehicle)
@@ -55,3 +55,18 @@ INSERT INTO fuel_logs (id, vehicle_id, fuel_quantity, fuel_cost, odometer_readin
 INSERT INTO expenses (id, category, description, amount, expense_date, vehicle_id, trip_id) VALUES
     ('60000000-0000-0000-0000-000000000001', 'Toll', 'Highway toll', 15.50, CURRENT_DATE, '10000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000003'),
     ('60000000-0000-0000-0000-000000000002', 'General', 'Office supplies', 250.0, CURRENT_DATE, NULL, NULL);
+
+-- 8. Operations Timeline
+INSERT INTO operations_timeline (vehicle_id, trip_id, driver_id, user_id, event_type, title, description, icon, event_color) VALUES
+    ('10000000-0000-0000-0000-000000000002', '30000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000002', 'TRIP_DISPATCHED', 'Trip TRP-1002 Dispatched', 'Dispatcher assigned driver Jane Smith to vehicle TRK-002', 'truck', 'blue'),
+    ('10000000-0000-0000-0000-000000000003', NULL, NULL, '00000000-0000-0000-0000-000000000001', 'MAINTENANCE_STARTED', 'Engine Overhaul Started', 'Vehicle TRK-003 entered shop for major overhaul', 'wrench', 'orange');
+
+-- 9. Alerts
+INSERT INTO alerts (severity, entity_type, entity_id, title, description) VALUES
+    ('WARNING', 'VEHICLE', '10000000-0000-0000-0000-000000000003', 'Maintenance Required', 'Vehicle TRK-003 health score dropped below 50.'),
+    ('CRITICAL', 'DRIVER', '20000000-0000-0000-0000-000000000005', 'License Expired', 'Driver Alice Green has an expired license.');
+
+-- 10. Fleet Health History
+INSERT INTO fleet_health_history (health_score, available_vehicles, maintenance_count, trip_success_rate) VALUES
+    (85, 2, 1, 98.5),
+    (88, 3, 0, 99.0);

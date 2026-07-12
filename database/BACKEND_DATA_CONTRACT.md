@@ -12,6 +12,8 @@ The database uses professional `snake_case`, while the backend API should use `c
 - `cargo_description` → `cargoDescription`
 - `cargo_weight` → `cargoWeight`
 - `planned_distance` → `plannedDistance`
+- `health_score` → `healthScore`
+- `risk_score` → `riskScore`
 - `vehicle_id` → `vehicleId`
 - `driver_id` → `driverId`
 - `trip_number` → `tripNumber`
@@ -41,7 +43,7 @@ The database uses professional `snake_case`, while the backend API should use `c
 
 ### vehicles
 - **Primary Key**: `id` (UUID)
-- **Important Columns**: `registration_number` (VARCHAR), `vehicle_type` (VARCHAR), `max_load_capacity` (NUMERIC), `odometer` (NUMERIC), `status` (vehicle_status enum)
+- **Important Columns**: `registration_number` (VARCHAR), `vehicle_type` (VARCHAR), `max_load_capacity` (NUMERIC), `odometer` (NUMERIC), `health_score` (NUMERIC), `status` (vehicle_status enum)
 - **Nullable Fields**: None
 - **Default Values**: `id` = `gen_random_uuid()`, `status` = `AVAILABLE`
 - **Important Constraints**: `registration_number` is UNIQUE and > 0 char length. `max_load_capacity > 0`, `odometer >= 0`.
@@ -57,7 +59,7 @@ The database uses professional `snake_case`, while the backend API should use `c
 
 ### trips
 - **Primary Key**: `id` (UUID)
-- **Important Columns**: `trip_number`, `origin`, `destination`, `cargo_description`, `cargo_weight`, `planned_distance`, `vehicle_id`, `driver_id`, `status` (trip_status enum), timestamps.
+- **Important Columns**: `trip_number`, `origin`, `destination`, `cargo_description`, `cargo_weight`, `planned_distance`, `vehicle_id`, `driver_id`, `risk_score` (NUMERIC), `status` (trip_status enum), timestamps.
 - **Nullable Fields**: `cargo_description`, `vehicle_id`, `driver_id`, `dispatched_at`, `completed_at`, `cancelled_at`, `cancellation_reason`
 - **Default Values**: `status` = `DRAFT`
 - **Foreign Keys**: `vehicle_id` REFERENCES vehicles (RESTRICT), `driver_id` REFERENCES drivers (RESTRICT)
@@ -86,6 +88,23 @@ The database uses professional `snake_case`, while the backend API should use `c
 - **Nullable Fields**: `description`, `vehicle_id`, `trip_id`
 - **Foreign Keys**: `vehicle_id` REFERENCES vehicles (RESTRICT), `trip_id` REFERENCES trips (RESTRICT)
 - **Important Constraints**: `amount >= 0`
+
+### operations_timeline
+- **Primary Key**: `id` (UUID)
+- **Important Columns**: `event_type`, `title`, `description`, `icon`, `event_color`
+- **Nullable Fields**: `vehicle_id`, `trip_id`, `driver_id`, `user_id`, `description`, `icon`, `event_color`
+- **Foreign Keys**: Set to `ON DELETE SET NULL` for relationships to prevent timeline deletion when entities are removed.
+
+### alerts
+- **Primary Key**: `id` (UUID)
+- **Important Columns**: `severity` (alert_severity enum), `is_read` (BOOLEAN), `title`, `entity_type`, `entity_id`
+- **Default Values**: `is_read` = `FALSE`
+- **Important Indexes**: `idx_alerts_entity_id`
+
+### fleet_health_history
+- **Primary Key**: `id` (UUID)
+- **Important Columns**: `health_score`, `available_vehicles`, `maintenance_count`, `trip_success_rate`
+- **Important Constraints**: `health_score` BETWEEN 0 AND 100.
 
 ## Auth Data Handoff
 - **Lookup Requirements**: Email lookup must be case-insensitive (use `LOWER(email)`).

@@ -37,6 +37,21 @@ CREATE TYPE maintenance_status AS ENUM (
     'COMPLETED'
 );
 
+CREATE TYPE fleet_pulse_status AS ENUM (
+    'EXCELLENT',
+    'HEALTHY',
+    'WARNING',
+    'CRITICAL',
+    'EMERGENCY'
+);
+
+CREATE TYPE alert_severity AS ENUM (
+    'INFO',
+    'WARNING',
+    'CRITICAL',
+    'EMERGENCY'
+);
+
 -- 3. Trigger Functions
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -69,6 +84,7 @@ CREATE TABLE vehicles (
     vehicle_type VARCHAR(100) NOT NULL,
     max_load_capacity NUMERIC NOT NULL CHECK (max_load_capacity > 0),
     odometer NUMERIC NOT NULL CHECK (odometer >= 0),
+    health_score NUMERIC NOT NULL DEFAULT 100 CHECK (health_score >= 0 AND health_score <= 100),
     status vehicle_status NOT NULL DEFAULT 'AVAILABLE',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -97,6 +113,7 @@ CREATE TABLE trips (
     planned_distance NUMERIC NOT NULL CHECK (planned_distance > 0),
     vehicle_id UUID REFERENCES vehicles(id) ON DELETE RESTRICT,
     driver_id UUID REFERENCES drivers(id) ON DELETE RESTRICT,
+    risk_score NUMERIC CHECK (risk_score >= 0 AND risk_score <= 100),
     status trip_status NOT NULL DEFAULT 'DRAFT',
     dispatched_at TIMESTAMPTZ,
     completed_at TIMESTAMPTZ,
@@ -145,6 +162,44 @@ CREATE TABLE expenses (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Operations Timeline Table
+CREATE TABLE operations_timeline (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    vehicle_id UUID REFERENCES vehicles(id) ON DELETE SET NULL,
+    trip_id UUID REFERENCES trips(id) ON DELETE SET NULL,
+    driver_id UUID REFERENCES drivers(id) ON DELETE SET NULL,
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    event_type VARCHAR(100) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    icon VARCHAR(50),
+    event_color VARCHAR(50),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Alerts Table
+CREATE TABLE alerts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    severity alert_severity NOT NULL,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    entity_type VARCHAR(50),
+    entity_id UUID,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Fleet Health History Table
+CREATE TABLE fleet_health_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    health_score NUMERIC NOT NULL CHECK (health_score >= 0 AND health_score <= 100),
+    available_vehicles INTEGER NOT NULL DEFAULT 0,
+    maintenance_count INTEGER NOT NULL DEFAULT 0,
+    trip_success_rate NUMERIC NOT NULL DEFAULT 100.0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- 5. Indexes and Constraints
 
 -- Prevent a vehicle from having more than one active dispatched trip
@@ -166,6 +221,8 @@ CREATE INDEX idx_maintenance_vehicle_id ON maintenance_records(vehicle_id);
 CREATE INDEX idx_fuel_logs_vehicle_id ON fuel_logs(vehicle_id);
 CREATE INDEX idx_expenses_vehicle_id ON expenses(vehicle_id);
 CREATE INDEX idx_expenses_trip_id ON expenses(trip_id);
+CREATE INDEX idx_operations_timeline_vehicle_id ON operations_timeline(vehicle_id);
+CREATE INDEX idx_alerts_entity_id ON alerts(entity_id);
 
 -- 6. Triggers for updated_at
 
@@ -195,4 +252,8 @@ FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER set_updated_at_expenses
 BEFORE UPDATE ON expenses
+FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER set_updated_at_alerts
+BEFORE UPDATE ON alerts
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
