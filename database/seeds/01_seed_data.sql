@@ -4,10 +4,10 @@
 
 -- 1. Users
 INSERT INTO users (id, name, email, password_hash, role, is_active) VALUES
-    ('00000000-0000-0000-0000-000000000001', 'Fleet Manager', 'manager@transitops.local', '$2a$12$KixbQo.t5.X88Vj4gG7j4OF4tJ5n3n3X3n3n3X3n3n3X3n3n3X3n3', 'FLEET_MANAGER', true),
-    ('00000000-0000-0000-0000-000000000002', 'Dispatcher', 'dispatcher@transitops.local', '$2a$12$KixbQo.t5.X88Vj4gG7j4OF4tJ5n3n3X3n3n3X3n3n3X3n3n3X3n3', 'DISPATCHER', true),
-    ('00000000-0000-0000-0000-000000000003', 'Safety Officer', 'safety@transitops.local', '$2a$12$KixbQo.t5.X88Vj4gG7j4OF4tJ5n3n3X3n3n3X3n3n3X3n3n3X3n3', 'SAFETY_OFFICER', true),
-    ('00000000-0000-0000-0000-000000000004', 'Financial Analyst', 'finance@transitops.local', '$2a$12$KixbQo.t5.X88Vj4gG7j4OF4tJ5n3n3X3n3n3X3n3n3X3n3n3X3n3', 'FINANCIAL_ANALYST', true);
+    ('00000000-0000-0000-0000-000000000001', 'Fleet Manager', 'fleet.manager@transitops.demo', '$2a$12$KixbQo.t5.X88Vj4gG7j4OF4tJ5n3n3X3n3n3X3n3n3X3n3n3X3n3', 'FLEET_MANAGER', true),
+    ('00000000-0000-0000-0000-000000000002', 'Dispatcher', 'dispatcher@transitops.demo', '$2a$12$KixbQo.t5.X88Vj4gG7j4OF4tJ5n3n3X3n3n3X3n3n3X3n3n3X3n3', 'DISPATCHER', true),
+    ('00000000-0000-0000-0000-000000000003', 'Safety Officer', 'safety.officer@transitops.demo', '$2a$12$KixbQo.t5.X88Vj4gG7j4OF4tJ5n3n3X3n3n3X3n3n3X3n3n3X3n3', 'SAFETY_OFFICER', true),
+    ('00000000-0000-0000-0000-000000000004', 'Financial Analyst', 'finance.analyst@transitops.demo', '$2a$12$KixbQo.t5.X88Vj4gG7j4OF4tJ5n3n3X3n3n3X3n3n3X3n3n3X3n3', 'FINANCIAL_ANALYST', true);
 
 -- 2. Vehicles
 INSERT INTO vehicles (id, registration_number, vehicle_type, max_load_capacity, odometer, health_score, status) VALUES
