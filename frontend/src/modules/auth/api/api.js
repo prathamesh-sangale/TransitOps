@@ -1,16 +1,35 @@
 import axios from 'axios';
 
-// Mock data adapter for development - structured for easy replacement when backend is ready
-const MOCK_AUTH_RESPONSE = {
-  success: true,
-  data: {
-    user: {
-      id: "development-user",
-      name: "TransitOps Manager",
-      email: "manager@transitops.local",
-      role: "FLEET_MANAGER"
-    },
-    token: "development-token"
+const MOCK_USERS = {
+  'manager@transitops.local': {
+    id: "development-user-1",
+    name: "Fleet Manager",
+    email: "manager@transitops.local",
+    role: "FLEET_MANAGER"
+  },
+  'dispatcher@transitops.local': {
+    id: "development-user-2",
+    name: "Dispatcher",
+    email: "dispatcher@transitops.local",
+    role: "DISPATCHER"
+  },
+  'safety@transitops.local': {
+    id: "development-user-3",
+    name: "Safety Officer",
+    email: "safety@transitops.local",
+    role: "SAFETY_OFFICER"
+  },
+  'finance@transitops.local': {
+    id: "development-user-4",
+    name: "Financial Analyst",
+    email: "finance@transitops.local",
+    role: "FINANCIAL_ANALYST"
+  },
+  'admin@transitops.com': {
+    id: "development-user",
+    name: "TransitOps Manager",
+    email: "admin@transitops.com",
+    role: "FLEET_MANAGER"
   }
 };
 
@@ -27,8 +46,20 @@ export const authApi = {
         throw new Error('Email and password are required');
       }
       
-      if (credentials.email === 'admin@transitops.com' && credentials.password === 'password123') {
-        return MOCK_AUTH_RESPONSE;
+      if (credentials.password !== 'password123') {
+        throw new Error('Invalid email or password');
+      }
+
+      const user = MOCK_USERS[credentials.email];
+      
+      if (user) {
+        return {
+          success: true,
+          data: {
+            user,
+            token: "development-token"
+          }
+        };
       }
 
       throw new Error('Invalid email or password');

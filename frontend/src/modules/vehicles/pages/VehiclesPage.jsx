@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../hooks/useAuth';
 import { vehicleApi } from '../api/vehicle.api';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
@@ -15,6 +16,7 @@ export const VehiclesPage = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const loadVehicles = async () => {
     setIsLoading(true);
@@ -49,9 +51,11 @@ export const VehiclesPage = () => {
           <h1 className="text-2xl font-bold text-text-primary">Vehicles Directory</h1>
           <p className="text-sm text-text-secondary mt-1">Manage fleet registration, status, and details</p>
         </div>
-        <Button onClick={() => navigate('/vehicles/new')} className="gap-2">
-          <Plus className="w-4 h-4" /> Add Vehicle
-        </Button>
+        {user?.role === 'FLEET_MANAGER' && (
+          <Button onClick={() => navigate('/vehicles/new')} className="gap-2">
+            <Plus className="w-4 h-4" /> Add Vehicle
+          </Button>
+        )}
       </div>
 
       {/* Filters and Search */}

@@ -19,6 +19,7 @@ export const TripDispatcherPage = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [isDispatching, setIsDispatching] = useState(false);
+  const [isSplitting, setIsSplitting] = useState(false);
   const [dispatchError, setDispatchError] = useState(null);
 
   useEffect(() => {
@@ -44,6 +45,24 @@ export const TripDispatcherPage = () => {
       fetchTrip();
     }
   }, [id, navigate]);
+
+  const handleSplit = async () => {
+    setIsSplitting(true);
+    setDispatchError(null);
+    try {
+      const result = await tripApi.splitTrip(id, parseInt(selectedVehicle.capacity, 10));
+      if (result.success) {
+        setTrip(result.data); // Update local trip to the new split weight
+        alert('Cargo split successfully! A new Draft trip has been created for the remaining cargo.');
+      } else {
+        setDispatchError('Failed to split trip');
+      }
+    } catch (err) {
+      setDispatchError(err.message || 'An error occurred during split');
+    } finally {
+      setIsSplitting(false);
+    }
+  };
 
   const handleDispatch = async () => {
     setIsDispatching(true);
@@ -161,7 +180,7 @@ export const TripDispatcherPage = () => {
             <Button 
               className="w-full gap-2" 
               size="lg"
-              disabled={!isValidToDispatch || isDispatching}
+              disabled={!isValidToDispatch || isDispatching || isSplitting}
               onClick={handleDispatch}
             >
               {isDispatching ? (
@@ -174,6 +193,25 @@ export const TripDispatcherPage = () => {
                 </>
               )}
             </Button>
+            
+            {!isCapacityOk && selectedVehicle && trip && (parseInt(trip.cargoWeight, 10) > parseInt(selectedVehicle.capacity, 10)) && (
+              <Button 
+                variant="outline"
+                className="w-full gap-2 mt-3" 
+                size="lg"
+                disabled={isSplitting || isDispatching}
+                onClick={handleSplit}
+              >
+                {isSplitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" /> Splitting...
+                  </>
+                ) : (
+                  'Split Cargo for this Vehicle'
+                )}
+              </Button>
+            )}
+
             {!isValidToDispatch && (
               <p className="text-xs text-danger text-center mt-3">
                 Cannot dispatch. Please resolve validation issues above.

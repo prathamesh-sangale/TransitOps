@@ -261,3 +261,127 @@ FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER set_updated_at_alerts
 BEFORE UPDATE ON alerts
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- 7. Business Rules Triggers
+
+-- Trigger 1: Validate Trip Dispatch & Capacity
+CREATE OR REPLACE FUNCTION validate_trip_dispatch()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_status vehicle_status;
+    v_capacity NUMERIC;
+    d_status driver_status;
+    d_expiry DATE;
+BEGIN
+    -- Only validate if a vehicle is assigned
+    IF NEW.vehicle_id IS NOT NULL THEN
+        SELECT status, max_load_capacity INTO v_status, v_capacity FROM vehicles WHERE id = NEW.vehicle_id;
+        
+        -- Rule: Cargo Weight must not exceed vehicle capacity
+        IF NEW.cargo_weight > v_capacity THEN
+            RAISE EXCEPTION 'Cargo weight (%) exceeds vehicle maximum capacity (%)', NEW.cargo_weight, v_capacity;
+        END IF;
+
+        -- Rule: If dispatching, vehicle cannot be RETIRED or IN_SHOP
+        IF NEW.status = 'DISPATCHED' AND v_status IN ('RETIRED', 'IN_SHOP') THEN
+            RAISE EXCEPTION 'Cannot dispatch trip: Vehicle is currently %', v_status;
+        END IF;
+    END IF;
+
+    -- Only validate if a driver is assigned
+    IF NEW.driver_id IS NOT NULL THEN
+        SELECT status, license_expiry INTO d_status, d_expiry FROM drivers WHERE id = NEW.driver_id;
+        
+        -- Rule: If dispatching, driver cannot be SUSPENDED or have expired license
+        IF NEW.status = 'DISPATCHED' THEN
+            IF d_status = 'SUSPENDED' THEN
+                RAISE EXCEPTION 'Cannot dispatch trip: Driver is suspended';
+            END IF;
+            IF d_expiry < CURRENT_DATE THEN
+                RAISE EXCEPTION 'Cannot dispatch trip: Driver license is expired';
+            END IF;
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validate_trip_dispatch
+BEFORE INSERT OR UPDATE ON trips
+FOR EACH ROW EXECUTE FUNCTION validate_trip_dispatch();
+
+
+-- Trigger 2: Prevent Odometer Rollback
+CREATE OR REPLACE FUNCTION prevent_odometer_rollback()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.odometer < OLD.odometer THEN
+        RAISE EXCEPTION 'Odometer reading cannot be decreased from % to %', OLD.odometer, NEW.odometer;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_prevent_odometer_rollback
+BEFORE UPDATE ON vehicles
+FOR EACH ROW EXECUTE FUNCTION prevent_odometer_rollback();
+
+
+-- Trigger 3: Automate Status Transitions on Trips
+CREATE OR REPLACE FUNCTION automate_trip_status_transitions()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- If trip just became DISPATCHED
+    IF NEW.status = 'DISPATCHED' AND (TG_OP = 'INSERT' OR OLD.status != 'DISPATCHED') THEN
+        IF NEW.vehicle_id IS NOT NULL THEN
+            UPDATE vehicles SET status = 'ON_TRIP' WHERE id = NEW.vehicle_id;
+        END IF;
+        IF NEW.driver_id IS NOT NULL THEN
+            UPDATE drivers SET status = 'ON_TRIP' WHERE id = NEW.driver_id;
+        END IF;
+    END IF;
+
+    -- If trip just became COMPLETED or CANCELLED
+    IF (NEW.status = 'COMPLETED' OR NEW.status = 'CANCELLED') AND (TG_OP = 'INSERT' OR OLD.status NOT IN ('COMPLETED', 'CANCELLED')) THEN
+        IF NEW.vehicle_id IS NOT NULL THEN
+            -- Restore vehicle to AVAILABLE, but ONLY if it is currently ON_TRIP (don't override RETIRED/IN_SHOP)
+            UPDATE vehicles SET status = 'AVAILABLE' WHERE id = NEW.vehicle_id AND status = 'ON_TRIP';
+        END IF;
+        IF NEW.driver_id IS NOT NULL THEN
+            -- Restore driver to AVAILABLE, only if currently ON_TRIP
+            UPDATE drivers SET status = 'AVAILABLE' WHERE id = NEW.driver_id AND status = 'ON_TRIP';
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_automate_trip_status_transitions
+AFTER INSERT OR UPDATE ON trips
+FOR EACH ROW EXECUTE FUNCTION automate_trip_status_transitions();
+
+
+-- Trigger 4: Automate Status Transitions on Maintenance
+CREATE OR REPLACE FUNCTION automate_maintenance_status_transitions()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- If maintenance is ACTIVE
+    IF NEW.status = 'ACTIVE' AND (TG_OP = 'INSERT' OR OLD.status != 'ACTIVE') THEN
+        UPDATE vehicles SET status = 'IN_SHOP' WHERE id = NEW.vehicle_id AND status != 'RETIRED';
+    END IF;
+
+    -- If maintenance is COMPLETED
+    IF NEW.status = 'COMPLETED' AND (TG_OP = 'INSERT' OR OLD.status != 'COMPLETED') THEN
+        -- Restore to AVAILABLE only if it's currently IN_SHOP (don't override RETIRED)
+        UPDATE vehicles SET status = 'AVAILABLE' WHERE id = NEW.vehicle_id AND status = 'IN_SHOP';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_automate_maintenance_status_transitions
+AFTER INSERT OR UPDATE ON maintenance_records
+FOR EACH ROW EXECUTE FUNCTION automate_maintenance_status_transitions();

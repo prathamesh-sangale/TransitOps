@@ -149,5 +149,44 @@ export const tripApi = {
     }
     const response = await axios.post(`/api/trips/${id}/cancel`);
     return response.data;
+  },
+
+  splitTrip: async (id, maxCapacity) => {
+    if (IS_MOCK) {
+      await delay(800);
+      const tripIndex = mockDataStore.trips.findIndex(t => t.id === id);
+      if (tripIndex === -1) throw new Error('Trip not found');
+      
+      const originalTrip = mockDataStore.trips[tripIndex];
+      const excessWeight = originalTrip.cargoWeight - maxCapacity;
+
+      if (excessWeight <= 0) {
+        throw new Error('Trip weight is already within capacity');
+      }
+
+      // Update original trip to max capacity
+      mockDataStore.trips[tripIndex] = {
+        ...originalTrip,
+        cargoWeight: maxCapacity
+      };
+
+      // Create new draft trip for the excess
+      const newTrip = {
+        ...originalTrip,
+        id: `TR-${Math.floor(Math.random() * 9000) + 1000}`,
+        cargoWeight: excessWeight,
+        cargoDescription: `${originalTrip.cargoDescription} (Part 2)`,
+        status: 'DRAFT',
+        vehicleId: null,
+        driverId: null,
+        dispatchedAt: null,
+      };
+      
+      mockDataStore.trips.push(newTrip);
+
+      return { success: true, data: mockDataStore.trips[tripIndex] };
+    }
+    const response = await axios.post(`/api/trips/${id}/split`, { maxCapacity });
+    return response.data;
   }
 };

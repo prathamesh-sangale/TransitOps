@@ -3,6 +3,7 @@ import { ROUTES } from '../constants/routes';
 import { AppLayout } from '../layouts/AppLayout';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { ProtectedRoute } from '../components/common/ProtectedRoute';
+import { RoleGuard } from '../components/common/RoleGuard';
 
 import { LoginPage } from '../modules/auth/pages/LoginPage';
 import { SessionExpiredPage } from '../modules/auth/pages/SessionExpiredPage';
@@ -36,8 +37,9 @@ import { MaintenancePage } from '../modules/maintenance/pages/MaintenancePage';
 import { CreateMaintenancePage } from '../modules/maintenance/pages/CreateMaintenancePage';
 import { MaintenanceDetailsPage } from '../modules/maintenance/pages/MaintenanceDetailsPage';
 
-// Placeholder Pages for future phases
-const FinancePlaceholder = () => <div className="p-6">Finance Module</div>;
+import { FinancePage } from '../modules/finance/pages/FinancePage';
+import { CreateExpensePage } from '../modules/finance/pages/CreateExpensePage';
+import { CreateFuelLogPage } from '../modules/finance/pages/CreateFuelLogPage';
 export const router = createBrowserRouter([
   {
     path: ROUTES.LOGIN,
@@ -65,29 +67,31 @@ export const router = createBrowserRouter([
       { path: ROUTES.DASHBOARD, element: <DashboardPage /> },
       
       // Vehicles
-      { path: ROUTES.VEHICLES, element: <VehiclesPage /> },
-      { path: `${ROUTES.VEHICLES}/new`, element: <CreateVehiclePage /> },
-      { path: `${ROUTES.VEHICLES}/:id`, element: <VehicleDetailsPage /> },
-      { path: `${ROUTES.VEHICLES}/:id/edit`, element: <EditVehiclePage /> },
+      { path: ROUTES.VEHICLES, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER']}><VehiclesPage /></RoleGuard> },
+      { path: `${ROUTES.VEHICLES}/new`, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER']}><CreateVehiclePage /></RoleGuard> },
+      { path: `${ROUTES.VEHICLES}/:id`, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER']}><VehicleDetailsPage /></RoleGuard> },
+      { path: `${ROUTES.VEHICLES}/:id/edit`, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER']}><EditVehiclePage /></RoleGuard> },
       
       // Drivers
-      { path: ROUTES.DRIVERS, element: <DriversPage /> },
-      { path: `${ROUTES.DRIVERS}/new`, element: <CreateDriverPage /> },
-      { path: `${ROUTES.DRIVERS}/:id`, element: <DriverDetailsPage /> },
-      { path: `${ROUTES.DRIVERS}/:id/edit`, element: <EditDriverPage /> },
+      { path: ROUTES.DRIVERS, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER']}><DriversPage /></RoleGuard> },
+      { path: `${ROUTES.DRIVERS}/new`, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER']}><CreateDriverPage /></RoleGuard> },
+      { path: `${ROUTES.DRIVERS}/:id`, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER']}><DriverDetailsPage /></RoleGuard> },
+      { path: `${ROUTES.DRIVERS}/:id/edit`, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER']}><EditDriverPage /></RoleGuard> },
 
       // Trips
-      { path: ROUTES.TRIPS, element: <TripsPage /> },
-      { path: `${ROUTES.TRIPS}/new`, element: <CreateTripPage /> },
-      { path: `${ROUTES.TRIPS}/:id`, element: <TripDetailsPage /> },
-      { path: `${ROUTES.TRIPS}/:id/dispatch`, element: <TripDispatcherPage /> },
+      { path: ROUTES.TRIPS, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'DISPATCHER']}><TripsPage /></RoleGuard> },
+      { path: `${ROUTES.TRIPS}/new`, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'DISPATCHER']}><CreateTripPage /></RoleGuard> },
+      { path: `${ROUTES.TRIPS}/:id`, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'DISPATCHER']}><TripDetailsPage /></RoleGuard> },
+      { path: `${ROUTES.TRIPS}/:id/dispatch`, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'DISPATCHER']}><TripDispatcherPage /></RoleGuard> },
 
-      { path: ROUTES.MAINTENANCE, element: <MaintenancePage /> },
-      { path: `${ROUTES.MAINTENANCE}/new`, element: <CreateMaintenancePage /> },
-      { path: `${ROUTES.MAINTENANCE}/:id`, element: <MaintenanceDetailsPage /> },
-      { path: ROUTES.FINANCE, element: <FinancePlaceholder /> },
-      { path: ROUTES.ANALYTICS, element: <AnalyticsPage /> },
-      { path: ROUTES.SETTINGS, element: <SettingsPage /> },
+      { path: ROUTES.MAINTENANCE, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'SAFETY_OFFICER']}><MaintenancePage /></RoleGuard> },
+      { path: `${ROUTES.MAINTENANCE}/new`, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'SAFETY_OFFICER']}><CreateMaintenancePage /></RoleGuard> },
+      { path: `${ROUTES.MAINTENANCE}/:id`, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'SAFETY_OFFICER']}><MaintenanceDetailsPage /></RoleGuard> },
+      { path: ROUTES.FINANCE, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'FINANCIAL_ANALYST']}><FinancePage /></RoleGuard> },
+      { path: `${ROUTES.FINANCE}/expenses/new`, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'FINANCIAL_ANALYST']}><CreateExpensePage /></RoleGuard> },
+      { path: `${ROUTES.FINANCE}/fuel/new`, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'FINANCIAL_ANALYST']}><CreateFuelLogPage /></RoleGuard> },
+      { path: ROUTES.ANALYTICS, element: <RoleGuard allowedRoles={['FLEET_MANAGER', 'FINANCIAL_ANALYST']}><AnalyticsPage /></RoleGuard> },
+      { path: ROUTES.SETTINGS, element: <RoleGuard allowedRoles={['FLEET_MANAGER']}><SettingsPage /></RoleGuard> },
     ],
   },
   { 

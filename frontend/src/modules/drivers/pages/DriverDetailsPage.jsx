@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../hooks/useAuth';
 import { driverApi } from '../api/driver.api';
 import { Button } from '../../../components/ui/Button';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
@@ -11,6 +12,7 @@ import { ROUTES } from '../../../constants/routes';
 export const DriverDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [driver, setDriver] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -96,13 +98,15 @@ export const DriverDetailsPage = () => {
         </div>
         
         <div className="flex gap-2 w-full sm:w-auto">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate(`/drivers/${id}/edit`)}
-            className="flex-1 sm:flex-none gap-2"
-          >
-            <Edit className="w-4 h-4" /> Edit
-          </Button>
+          {user?.role === 'FLEET_MANAGER' && (
+            <Button 
+              variant="outline" 
+              onClick={() => navigate(`/drivers/${id}/edit`)}
+              className="flex-1 sm:flex-none gap-2"
+            >
+              <Edit className="w-4 h-4" /> Edit
+            </Button>
+          )}
           {driver.status !== 'SUSPENDED' && (
             <Button 
               variant="danger" 
@@ -148,12 +152,16 @@ export const DriverDetailsPage = () => {
           <div className="bg-surface rounded-lg shadow-sm border border-border-subtle p-6">
             <h3 className="text-sm font-bold text-text-primary mb-4 uppercase tracking-wider">Quick Actions</h3>
             <div className="space-y-3">
-              <Button variant="outline" className="w-full justify-start gap-2" disabled={driver.status === 'SUSPENDED'}>
-                <Route className="w-4 h-4" /> View Trip History
-              </Button>
-              <Button variant="outline" className="w-full justify-start gap-2" disabled={driver.status === 'SUSPENDED'}>
-                <ShieldAlert className="w-4 h-4" /> Report Incident
-              </Button>
+              {['FLEET_MANAGER', 'DISPATCHER'].includes(user?.role) && (
+                <Button variant="outline" className="w-full justify-start gap-2" disabled={driver.status === 'SUSPENDED'} onClick={() => navigate(ROUTES.TRIPS)}>
+                  <Route className="w-4 h-4" /> View Trip History
+                </Button>
+              )}
+              {user?.role === 'FLEET_MANAGER' && (
+                <Button variant="outline" className="w-full justify-start gap-2" disabled={driver.status === 'SUSPENDED'} onClick={() => alert('Incident reporting coming soon!')}>
+                  <ShieldAlert className="w-4 h-4" /> Report Incident
+                </Button>
+              )}
             </div>
           </div>
         </div>

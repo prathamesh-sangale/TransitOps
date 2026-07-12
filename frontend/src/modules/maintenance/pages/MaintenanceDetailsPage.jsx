@@ -6,7 +6,7 @@ import { ArrowLeft, CheckCircle, Clock, Truck, Wrench } from 'lucide-react';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 
-const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+const formatCurrency = (val) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(val);
 const formatDate = (dateString) => {
   if (!dateString) return '';
   return new Date(dateString).toLocaleDateString('en-US', {

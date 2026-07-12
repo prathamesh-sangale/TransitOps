@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../hooks/useAuth';
 import { driverApi } from '../api/driver.api';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
@@ -16,6 +17,7 @@ export const DriversPage = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const loadDrivers = async () => {
     setIsLoading(true);
@@ -48,9 +50,11 @@ export const DriversPage = () => {
           <h1 className="text-2xl font-bold text-text-primary">Drivers Directory</h1>
           <p className="text-sm text-text-secondary mt-1">Manage personnel, licenses, and safety scores</p>
         </div>
-        <Button onClick={() => navigate('/drivers/new')} className="gap-2">
-          <Plus className="w-4 h-4" /> Add Driver
-        </Button>
+        {user?.role === 'FLEET_MANAGER' && (
+          <Button onClick={() => navigate('/drivers/new')} className="gap-2">
+            <Plus className="w-4 h-4" /> Add Driver
+          </Button>
+        )}
       </div>
 
       <div className="bg-surface p-4 rounded-lg shadow-sm border border-border-subtle flex flex-col sm:flex-row gap-4 items-center">

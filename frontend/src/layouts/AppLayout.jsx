@@ -5,14 +5,14 @@ import { LayoutDashboard, Truck, Users, Route, Wrench, WalletCards, ChartNoAxesC
 import { useState } from 'react';
 
 const NAV_ITEMS = [
-  { path: ROUTES.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
-  { path: ROUTES.VEHICLES, label: 'Vehicles', icon: Truck },
-  { path: ROUTES.DRIVERS, label: 'Drivers', icon: Users },
-  { path: ROUTES.TRIPS, label: 'Trips', icon: Route },
-  { path: ROUTES.MAINTENANCE, label: 'Maintenance', icon: Wrench },
-  { path: ROUTES.FINANCE, label: 'Finance', icon: WalletCards },
-  { path: ROUTES.ANALYTICS, label: 'Analytics', icon: ChartNoAxesCombined },
-  { path: ROUTES.SETTINGS, label: 'Settings', icon: Settings },
+  { path: ROUTES.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard, allowedRoles: ['FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER', 'FINANCIAL_ANALYST'] },
+  { path: ROUTES.VEHICLES, label: 'Vehicles', icon: Truck, allowedRoles: ['FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER'] },
+  { path: ROUTES.DRIVERS, label: 'Drivers', icon: Users, allowedRoles: ['FLEET_MANAGER', 'DISPATCHER', 'SAFETY_OFFICER'] },
+  { path: ROUTES.TRIPS, label: 'Trips', icon: Route, allowedRoles: ['FLEET_MANAGER', 'DISPATCHER'] },
+  { path: ROUTES.MAINTENANCE, label: 'Maintenance', icon: Wrench, allowedRoles: ['FLEET_MANAGER', 'SAFETY_OFFICER'] },
+  { path: ROUTES.FINANCE, label: 'Finance', icon: WalletCards, allowedRoles: ['FLEET_MANAGER', 'FINANCIAL_ANALYST'] },
+  { path: ROUTES.ANALYTICS, label: 'Analytics', icon: ChartNoAxesCombined, allowedRoles: ['FLEET_MANAGER', 'FINANCIAL_ANALYST'] },
+  { path: ROUTES.SETTINGS, label: 'Settings', icon: Settings, allowedRoles: ['FLEET_MANAGER'] },
 ];
 
 export const AppLayout = () => {
@@ -40,7 +40,7 @@ export const AppLayout = () => {
         </div>
         
         <nav className="p-4 space-y-1 overflow-y-auto h-[calc(100vh-4rem)]">
-          {NAV_ITEMS.map((item) => (
+          {NAV_ITEMS.filter(item => !item.allowedRoles || item.allowedRoles.includes(user?.role)).map((item) => (
             <NavLink
               key={item.path}
               to={item.path}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../hooks/useAuth';
 import { vehicleApi } from '../api/vehicle.api';
 import { Button } from '../../../components/ui/Button';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
@@ -10,6 +11,7 @@ import { ROUTES } from '../../../constants/routes';
 export const VehicleDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [vehicle, setVehicle] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -96,7 +98,7 @@ export const VehicleDetailsPage = () => {
         </div>
         
         <div className="flex gap-2 w-full sm:w-auto">
-          {vehicle.status !== 'RETIRED' && (
+          {vehicle.status !== 'RETIRED' && user?.role === 'FLEET_MANAGER' && (
             <>
               <Button 
                 variant="outline" 
@@ -144,12 +146,16 @@ export const VehicleDetailsPage = () => {
           <div className="bg-surface rounded-lg shadow-sm border border-border-subtle p-6">
             <h3 className="text-sm font-bold text-text-primary mb-4 uppercase tracking-wider">Quick Actions</h3>
             <div className="space-y-3">
-              <Button variant="outline" className="w-full justify-start gap-2" disabled={vehicle.status === 'RETIRED'}>
-                <Route className="w-4 h-4" /> View Trip History
-              </Button>
-              <Button variant="outline" className="w-full justify-start gap-2" disabled={vehicle.status === 'RETIRED'}>
-                <Wrench className="w-4 h-4" /> View Maintenance
-              </Button>
+              {['FLEET_MANAGER', 'DISPATCHER'].includes(user?.role) && (
+                <Button variant="outline" className="w-full justify-start gap-2" disabled={vehicle.status === 'RETIRED'} onClick={() => navigate(ROUTES.TRIPS)}>
+                  <Route className="w-4 h-4" /> View Trip History
+                </Button>
+              )}
+              {['FLEET_MANAGER', 'SAFETY_OFFICER'].includes(user?.role) && (
+                <Button variant="outline" className="w-full justify-start gap-2" disabled={vehicle.status === 'RETIRED'} onClick={() => navigate(ROUTES.MAINTENANCE)}>
+                  <Wrench className="w-4 h-4" /> View Maintenance
+                </Button>
+              )}
             </div>
           </div>
         </div>
